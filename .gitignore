@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# venv
+.venv/
+venv/
+env/
+
+# 向量库数据 (可本地重建, 不用入仓)
+data/
+
+# HuggingFace / sentence-transformers 下载缓存
+.cache/
+
+# 编辑器 / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# 日志 / 环境变量
+*.log
+.env

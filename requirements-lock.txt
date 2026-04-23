@@ -1,0 +1,11 @@
+# 本文件应由 `pip freeze > requirements-lock.txt` 生成.
+# 它记录了某一次跑通时的精确版本组合, 用来复现环境.
+#
+# 使用方式:
+#   1. 跟着 README 装好 requirements.txt 并跑通项目
+#   2. 运行: pip freeze > requirements-lock.txt
+#   3. 提交这份文件, 下次别人就可以用 `pip install -r requirements-lock.txt` 精确复现
+#
+# 为什么需要两份文件:
+#   - requirements.txt: 宽松版本范围, 声明"兼容什么"
+#   - requirements-lock.txt: 精确版本, 声明"我实际用的是哪组"
