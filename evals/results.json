@@ -1,0 +1,18 @@
+[
+  {
+    "id": "q1",
+    "question": "RAG 是什么的缩写?",
+    "retrieval_hit": true,
+    "keyword_recall": 0.0,
+    "phrase_hit": true,
+    "answer": "RAG 是 retrieval-augmented generation 的缩写[片段 1, 片段 2]。"
+  },
+  {
+    "id": "q2",
+    "question": "为什么大模型需要 RAG?",
+    "retrieval_hit": true,
+    "keyword_recall": 0.0,
+    "phrase_hit": null,
+    "answer": "大语言模型有三个常见问题，因此需要使用RAG。资料中提及的这些问题包括生成的内容缺乏多样性、难以追溯来源以及无法处理包含多个信息点的问题。[片段 1, 片段 2]"
+  }
+]

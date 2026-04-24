@@ -43,8 +43,8 @@ class RAGPipeline:
         if use_reranker:
             from sentence_transformers import CrossEncoder
             print(f"[init] 加载 reranker: {reranker_model}")
-            # self.reranker = CrossEncoder(reranker_model)
-            self.reranker = CrossEncoder(reranker_model, device='cpu')
+            self.reranker = CrossEncoder(reranker_model)
+            # self.reranker = CrossEncoder(reranker_model, device='cpu')
         else:
             self.reranker = None
 
