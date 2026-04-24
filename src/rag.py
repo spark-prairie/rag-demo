@@ -47,11 +47,28 @@ class RAGPipeline:
 
     # ---------- 1. 加载 ----------
     def load_documents(self) -> List[Dict]:
-        """加载 docs/ 下所有 .md 和 .txt 文件 (想支持 PDF 就在这里扩展)."""
+        """加载 docs/ 下所有 .md / .txt / .pdf 文件."""
         docs = []
         for path in sorted(self.docs_dir.rglob("*")):
-            if path.suffix.lower() in {".md", ".txt"} and path.is_file():
-                text = path.read_text(encoding="utf-8")
+            if not path.is_file():
+                continue
+            suffix = path.suffix.lower()
+            try:
+                if suffix in {".md", ".txt"}:
+                    text = path.read_text(encoding="utf-8")
+                elif suffix == ".pdf":
+                    import pypdf
+                    reader = pypdf.PdfReader(str(path))
+                    text = "\n\n".join(
+                        page.extract_text() or "" for page in reader.pages
+                    )
+                else:
+                    continue
+            except Exception as e:
+                print(f"[load] 跳过 {path}: {e}")
+                continue
+
+            if text.strip():
                 docs.append({"path": str(path), "text": text})
                 print(f"[load] {path} ({len(text)} chars)")
         return docs
