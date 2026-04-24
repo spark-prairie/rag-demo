@@ -1,6 +1,11 @@
 # 🧠 RAG Demo
 
-![Demo](assets/demo.png)
+![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
+![License](https://img.shields.io/badge/License-MIT-green)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.x-ee4c2c?logo=pytorch)
+![Ollama](https://img.shields.io/badge/Ollama-local-black)
+
+![Demo](assets/demo.gif)
 
 一个极简但完整的本地 **RAG (检索增强生成)** 演示项目. 100% 在本地运行, 不依赖任何云端 API.
 
