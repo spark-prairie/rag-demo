@@ -21,6 +21,9 @@ class RAGPipeline:
         collection_name: str = "rag_demo",
         chunk_size: int = 500,
         chunk_overlap: int = 50,
+        reranker_model: str = "BAAI/bge-reranker-base",
+        use_reranker: bool = True,
+        rerank_top_n: int = 20,  # 粗排阶段取多少个再重排
         top_k: int = 3,
     ):
         self.docs_dir = Path(docs_dir)
@@ -34,6 +37,15 @@ class RAGPipeline:
 
         print(f"[init] 加载 embedding 模型: {embedding_model}")
         self.embedder = SentenceTransformer(embedding_model)
+
+        self.use_reranker = use_reranker
+        self.rerank_top_n = rerank_top_n
+        if use_reranker:
+            from sentence_transformers import CrossEncoder
+            print(f"[init] 加载 reranker: {reranker_model}")
+            self.reranker = CrossEncoder(reranker_model)
+        else:
+            self.reranker = None
 
         print(f"[init] 初始化 Chroma (持久化目录: {self.db_dir})")
         self.client = chromadb.PersistentClient(
@@ -141,23 +153,35 @@ class RAGPipeline:
         q_emb = self.embedder.encode(
             [query], normalize_embeddings=True
         ).tolist()
+        
+        # 如果启用 reranker, 先取更多候选; 否则直接取 top_k
+        n_candidates = self.rerank_top_n if self.use_reranker else self.top_k
         results = self.collection.query(
             query_embeddings=q_emb,
-            n_results=self.top_k,
+            n_results=n_candidates,
         )
+        
         hits = []
         for doc, meta, dist in zip(
             results["documents"][0],
             results["metadatas"][0],
             results["distances"][0],
         ):
-            hits.append(
-                {
-                    "text": doc,
-                    "source": meta["source"],
-                    "score": 1 - dist,  # cosine distance -> similarity
-                }
-            )
+            hits.append({
+                "text": doc,
+                "source": meta["source"],
+                "score": 1 - dist,
+            })
+        
+        # 重排
+        if self.use_reranker and hits:
+            pairs = [(query, h["text"]) for h in hits]
+            rerank_scores = self.reranker.predict(pairs)
+            for h, s in zip(hits, rerank_scores):
+                h["rerank_score"] = float(s)
+            hits.sort(key=lambda x: x["rerank_score"], reverse=True)
+            hits = hits[: self.top_k]
+        
         return hits
 
     # ---------- 6. 生成 ----------
