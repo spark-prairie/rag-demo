@@ -1,0 +1,34 @@
+{
+  "baseline": {
+    "config": {
+      "use_reranker": false,
+      "chunk_size": 500
+    },
+    "retrieval_hit_rate": 1.0,
+    "keyword_recall": 0.0
+  },
+  "with_reranker": {
+    "config": {
+      "use_reranker": true,
+      "chunk_size": 500
+    },
+    "retrieval_hit_rate": 1.0,
+    "keyword_recall": 0.0
+  },
+  "smaller_chunks": {
+    "config": {
+      "use_reranker": true,
+      "chunk_size": 300
+    },
+    "retrieval_hit_rate": 1.0,
+    "keyword_recall": 0.0
+  },
+  "larger_chunks": {
+    "config": {
+      "use_reranker": true,
+      "chunk_size": 800
+    },
+    "retrieval_hit_rate": 1.0,
+    "keyword_recall": 0.0
+  }
+}
