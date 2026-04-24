@@ -75,17 +75,23 @@ class RAGPipeline:
 
     # ---------- 2. 切分 ----------
     def split_text(self, text: str) -> List[str]:
-        """固定长度 + 重叠的朴素切分. 生产环境建议换成按段落/句子的语义切分."""
+        """按段落切, 太长的段落再按固定长度切分."""
+        # 先按段落切 (连续换行视为段落分隔)
+        paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+        
         chunks = []
-        start = 0
-        while start < len(text):
-            end = min(start + self.chunk_size, len(text))
-            chunk = text[start:end].strip()
-            if chunk:
-                chunks.append(chunk)
-            if end == len(text):
-                break
-            start = end - self.chunk_overlap
+        for para in paragraphs:
+            if len(para) <= self.chunk_size:
+                chunks.append(para)
+            else:
+                # 长段落降级用滑窗切分
+                start = 0
+                while start < len(para):
+                    end = min(start + self.chunk_size, len(para))
+                    chunks.append(para[start:end].strip())
+                    if end == len(para):
+                        break
+                    start = end - self.chunk_overlap
         return chunks
 
     # ---------- 3 & 4. 向量化 + 入库 ----------
