@@ -43,7 +43,8 @@ class RAGPipeline:
         if use_reranker:
             from sentence_transformers import CrossEncoder
             print(f"[init] 加载 reranker: {reranker_model}")
-            self.reranker = CrossEncoder(reranker_model)
+            # self.reranker = CrossEncoder(reranker_model)
+            self.reranker = CrossEncoder(reranker_model, device='cpu')
         else:
             self.reranker = None
 
@@ -185,33 +186,42 @@ class RAGPipeline:
         return hits
 
     # ---------- 6. 生成 ----------
-    def generate(self, query: str, hits: List[Dict]) -> str:
+    def generate(self, query: str, hits: List[Dict], history: List[Dict] = None) -> str:
         context = "\n\n".join(
-            [
-                f"【片段 {i+1} | 来源: {h['source']}】\n{h['text']}"
-                for i, h in enumerate(hits)
-            ]
+            f"【片段 {i+1} | 来源: {h['source']}】\n{h['text']}"
+            for i, h in enumerate(hits)
         )
-        prompt = f"""你是一个严谨的问答助手. 请只根据下面提供的资料片段回答用户问题.
-如果资料里没有相关信息, 直接回答"资料中未提及", 不要编造.
+        
+        messages = []
+        # 系统指令
+        system_prompt = """你是一个严谨的问答助手. 请根据提供的资料片段回答用户问题.
+如果资料里没有相关信息, 直接回答"资料中未提及", 不要编造."""
+        messages.append({"role": "system", "content": system_prompt})
+        
+        # 历史对话 (只保留最近 3 轮, 避免 context 爆炸)
+        if history:
+            for msg in history[-6:]:  # 3 轮 = 6 条消息 (user + assistant 各 3)
+                messages.append(msg)
+        
+        # 当前问题 + 检索到的资料
+        user_prompt = f"""===参考资料===
+    {context}
+    ===资料结束===
 
-===资料开始===
-{context}
-===资料结束===
+    问题: {query}
 
-用户问题: {query}
-
-请用中文给出简洁准确的回答, 并在末尾用方括号标注你主要参考了哪些片段编号, 例如 [片段 1, 片段 2].
-"""
+    请用中文简洁准确地回答, 末尾标注主要参考的片段编号如 [片段 1, 片段 2]."""
+        messages.append({"role": "user", "content": user_prompt})
+        
         response = ollama.chat(
             model=self.llm_model,
-            messages=[{"role": "user", "content": prompt}],
+            messages=messages,
             options={"temperature": 0.2},
         )
         return response["message"]["content"]
 
     # ---------- 对外入口 ----------
-    def ask(self, query: str) -> Dict:
+    def ask(self, query: str, history: List[Dict] = None) -> Dict:
         hits = self.retrieve(query)
         answer = self.generate(query, hits)
         return {"query": query, "answer": answer, "hits": hits}

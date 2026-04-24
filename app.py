@@ -13,7 +13,7 @@ rag = RAGPipeline()
 def chat(message: str, history):
     if rag.collection.count() == 0:
         return "向量库是空的, 请先点上面的 \"重建索引\" 按钮. (别忘了先往 docs/ 目录放文档)"
-    result = rag.ask(message)
+    result = rag.ask(message, history=history)
     sources_md = "\n\n---\n**引用片段**"
     for i, h in enumerate(result["hits"], 1):
         preview = h["text"].replace("\n", " ")[:150]
