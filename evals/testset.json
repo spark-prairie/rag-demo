@@ -1,0 +1,15 @@
+[
+  {
+    "id": "q1",
+    "question": "RAG 是什么的缩写?",
+    "expected_source": "rag-intro.md",
+    "expected_keywords": ["检索", "增强", "生成"],
+    "expected_answer_contains": "Retrieval-Augmented Generation"
+  },
+  {
+    "id": "q2",
+    "question": "为什么大模型需要 RAG?",
+    "expected_source": "rag-intro.md",
+    "expected_keywords": ["知识截止", "幻觉", "私有数据"]
+  }
+]
